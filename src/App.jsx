@@ -1,35 +1,52 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [status, setStatus] = useState("Glissez un fichier ici pour l’envoyer");
+
+  const onDrop = useCallback(async (acceptedFiles) => {
+    const file = acceptedFiles[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setStatus("📤 Envoi en cours...");
+
+    try {
+      const response = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        setStatus(`✅ ${file.name} envoyé avec succès !`);
+      } else {
+        const err = await response.json();
+        setStatus(`❌ Erreur : ${err.error}`);
+      }
+    } catch (error) {
+      setStatus(`❌ Erreur réseau : ${error.message}`);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        BOONJOUR
-      </p>
-    </>
-  )
+    <div
+      {...getRootProps()}
+      style={{
+        border: "2px dashed gray",
+        borderRadius: "10px",
+        padding: "50px",
+        textAlign: "center",
+        margin: "50px",
+      }}
+    >
+      <input {...getInputProps()} />
+      {isDragActive ? (
+        <p>Déposez le fichier ici...</p>
+      ) : (
+        <p>{status}</p>
+      )}
+    </div>
+  );
 }
-
-export default App
