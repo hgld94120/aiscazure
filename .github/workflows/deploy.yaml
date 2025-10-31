@@ -2,7 +2,7 @@ name: Build and Push React Application to ACR
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 env: 
   IMAGE_TAG: latest
