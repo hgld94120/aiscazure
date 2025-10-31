@@ -1,16 +1,17 @@
 name: Build and Push React Application to ACR
-
+#Lors du git push sur la branche main, les actions seront effectuées par un worker, une "vm" qui éxécutera les actions décrites
+#dans ce fichier
 on:
   push:
     branches: [ main ]
 
 env: 
   IMAGE_TAG: latest
-
+#Titre des actions et commandes a effectuer
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
+#tournera sur ubuntu-latest    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,11 +22,12 @@ jobs:
             ${{ secrets.ACR_NAME }} \
             -u ${{ secrets.ACR_USERNAME }} \
             --password-stdin
-      
+#Connexion au registre azure a l'aide des secrets définis dans le script de déploiement      
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.ACR_NAME }}/${{ secrets.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
-      
+#Création de l'image dans le registre      
       - name: Push image to ACR
         run: |
           docker push ${{ secrets.ACR_NAME }}/${{ secrets.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+#Mise en ligne de l'image          
